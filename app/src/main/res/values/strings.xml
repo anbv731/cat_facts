@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Cat Facts</string>
+    <string name="title_facts">Факты из интернета</string>
+    <string name="title_favourite">Избранное</string>
+</resources>

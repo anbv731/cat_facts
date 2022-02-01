@@ -1,0 +1,26 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+        resolutionStrategy {
+            eachPlugin {
+                if (requested.id.id == 'realm-android') {
+                    useModule("io.realm:realm-gradle-plugin:10.10.1")
+                }
+            }
+
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "Cat Facts"
+include ':app'
+
