@@ -1,4 +1,4 @@
-package com.example.catfacts.ui.notifications
+package com.example.catfacts.ui.favourite
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

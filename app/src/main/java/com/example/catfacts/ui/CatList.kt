@@ -9,6 +9,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.catfacts.R
 import com.example.catfacts.ui.DetailActivity.Companion.CAT_FACT_TEXT
+import io.realm.RealmChangeListener
+import io.realm.RealmResults
+import io.realm.kotlin.addChangeListener
 
 class CatAdapter(private val cats: List<Cat>) : RecyclerView.Adapter<CatViewHolder>() {
 
@@ -40,9 +43,7 @@ class CatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
 
     fun bind(cat: Cat) {
-        textView.text = cat.text //загружаем текст в TextView
-
-//        Glide.with(itemView).load(imageUrl).into(imageView) //загружаем картинку в imageView
+        textView.text = cat.text
         itemView.setOnClickListener{
             openDetailActivity(itemView.context, cat)
         }

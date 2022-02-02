@@ -1,66 +1,81 @@
-package com.example.catfacts.ui.home
+package com.example.catfacts.ui.facts
 
-import android.app.Application
-import android.content.Context
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.example.catfacts.databinding.FragmentFactsBinding
 import com.example.catfacts.ui.Cat
+import com.example.catfacts.ui.CatAdapter
 import io.realm.Realm
-import io.realm.Realm.*
 import io.realm.RealmConfiguration
-
 import org.json.JSONArray
-import org.json.JSONObject
 
 
-class FactsViewModel (application: Application) : AndroidViewModel(application) {
+class FactsFragment : Fragment() {
     private val url: String = "https://cat-fact.herokuapp.com/facts"
-    var context: Context = getApplication()
-    val queue = Volley.newRequestQueue(context)
+
+        private var _binding: FragmentFactsBinding? = null
+    private val binding get() = _binding!!
+
+    override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+    ): View {
+
+
+        _binding = FragmentFactsBinding.inflate(inflater, container, false)
+        val root: View = binding.root
+
+//        val text = binding.textFacts
+
+        return root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
 
 
-fun getList (){
-    getFactsFromServer(queue)
-}
-
-
-
-
-
-    private var catList = MutableLiveData<List<Cat>>()
-
-     fun getData () {
-        if (catList == null) {
-            catList =  MutableLiveData<List<Cat>>()}
-
-        initRealm()
+//        initRealm()
+//        showListFromDB()
+        val queue = Volley.newRequestQueue(requireContext())
         getFactsFromServer(queue)
-        val catList=loadFromDB()
-        FactsFragment().setList(catList)
+
+
 
     }
 
-     fun getFactsFromServer(queue: RequestQueue) {
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+
+    private fun getFactsFromServer(queue: RequestQueue) {
         val stringRequest = StringRequest(
             0,
             url,
             { response ->
 
                 val catList = parseResponse(response)
-                FactsFragment().setList(catList)
+                setList(catList)
+
+               // saveIntoDB(catList)
+               // showListFromDB()
 
 
             },
             {
                 println(it.message)
-                Toast.makeText(context, it.message, Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
 
             }
 
@@ -69,12 +84,6 @@ fun getList (){
 
     }
 
-
-    private fun parseImageResponse(responseText: String): String {
-        val jsonObject = JSONObject(responseText)
-        val catImage = jsonObject.getString("file")
-        return catImage//возвращаемое значение функции
-    }
 
     private fun parseResponse(responseText: String): List<Cat> {
         //создаем пустой список объектов класса Cat
@@ -98,16 +107,8 @@ fun getList (){
         return catList //возвращаемое значение функции
     }
 
-//    private fun setList(cats: List<Cat>) {
-//        val adapter = CatAdapter(cats)
-//        recyclerViewId.adapter = adapter
-//
-//        val layoutManager = LinearLayoutManager(this)
-//        recyclerViewId.layoutManager = layoutManager
-//    }
-
     private fun initRealm() {
-        Realm.init(context)
+        Realm.init(requireContext())
         val config = RealmConfiguration.Builder().deleteRealmIfMigrationNeeded().build()
         Realm.setDefaultConfiguration(config)
     }
@@ -124,13 +125,16 @@ fun getList (){
         return realm.where(Cat::class.java).findAll()
     }
 
-//    fun showListFromDB (){
-//        val cats=loadFromDB()
-//        FactsFragment().setList(cats)
-//    }
-//
+    fun showListFromDB (){
+        val cats=loadFromDB()
+        setList(cats)
+    }
+    fun setList(cats: List<Cat>) {
+        val adapter = CatAdapter(cats)
+        binding.recyclerViewId.adapter = adapter
 
-
-
+        val layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerViewId.layoutManager = layoutManager
+    }
 
 }
