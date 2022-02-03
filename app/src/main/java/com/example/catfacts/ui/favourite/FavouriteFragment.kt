@@ -19,6 +19,8 @@ import io.realm.RealmResults
 
 
 class FavouriteFragment : Fragment() {
+    lateinit var  realm :Realm
+    lateinit var realmChangeListener: RealmChangeListener<Realm>
 
     private var _binding: FragmentFavouriteBinding? = null
 
@@ -46,8 +48,13 @@ class FavouriteFragment : Fragment() {
 
 
         initRealm()
-        showListFromDB()
-//        val realm= Realm.getDefaultInstance()
+         realm= Realm.getDefaultInstance()
+        val cats = realm.where(Cat::class.java).findAll()
+         realmChangeListener = RealmChangeListener<Realm> {println("REALM CHANGEed")
+            setList(cats)}
+        realm.addChangeListener(realmChangeListener)
+        setList(cats)
+        //        val realm= Realm.getDefaultInstance()
 //        val realmListener= RealmChangeListener<Realm> { results -> }
 //        realm.addChangeListener(realmListener)
         }
@@ -61,6 +68,9 @@ class FavouriteFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        realm.removeAllChangeListeners()
+        realm.close()
+
     }
     private fun initRealm() {
         Realm.init(requireContext())
@@ -75,19 +85,18 @@ class FavouriteFragment : Fragment() {
         realm.commitTransaction()
     }
 
-    fun loadFromDB ():List<Cat>{
-        val realm= Realm.getDefaultInstance()
-        val cats = realm.where(Cat::class.java).findAll()
+//    fun loadFromDB ():List<Cat>{
+//
+//
+//
+//    }
 
-        cats.addChangeListener (RealmChangeListener<RealmResults<Cat>> { results -> })
-        return cats
-    }
 
-    fun showListFromDB (){
-        val cats=loadFromDB()
-
-        setList(cats)
-    }
+//    fun showListFromDB (){
+//        val cats=loadFromDB()
+//
+//        setList(cats)
+//    }
     fun setList(cats: List<Cat>) {
         val adapter = CatAdapter(cats)
         binding.recyclerViewFv.adapter = adapter

@@ -15,6 +15,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.example.catfacts.R
 import com.example.catfacts.ui.favourite.FavouriteFragment
 import io.realm.Realm
+import io.realm.RealmChangeListener
 import io.realm.RealmConfiguration
 import io.realm.RealmResults
 import io.realm.kotlin.where
@@ -24,6 +25,8 @@ class DetailActivity : AppCompatActivity() {
     private lateinit var textViewDetail: TextView
     private lateinit var imageViewDetail: ImageView
     private lateinit var button: Button
+    lateinit var realm :Realm
+    lateinit var realmChangeListener : RealmChangeListener<Realm>
 
 
     companion object {
@@ -44,6 +47,9 @@ class DetailActivity : AppCompatActivity() {
         getImageFromServer(queue)
         setupActionBar()
         initRealm()
+        realm = Realm.getDefaultInstance()
+        realmChangeListener = RealmChangeListener<Realm>{setText()}
+        realm.addChangeListener(realmChangeListener)
         setText()
 
 
@@ -60,7 +66,6 @@ class DetailActivity : AppCompatActivity() {
     }
 
     fun deletFromDB(cat: Cat) {
-        val realm = Realm.getDefaultInstance()
         realm.beginTransaction()
         val catsDB: RealmResults<Cat> =
             realm.where(Cat::class.java).equalTo("text", cat.text).findAll()
@@ -74,7 +79,7 @@ class DetailActivity : AppCompatActivity() {
     }
 
     fun saveIntoDB(cat: Cat) {
-        val realm = Realm.getDefaultInstance()
+
         realm.beginTransaction()
         val catsDB: RealmResults<Cat> =
             realm.where(Cat::class.java).equalTo("text", cat.text).findAll()
@@ -105,17 +110,18 @@ class DetailActivity : AppCompatActivity() {
     private fun setText() {
         val text = intent?.extras?.getString(CAT_FACT_TEXT)
         textViewDetail.text = text
-        val cat = Cat()
-        cat.text = text!!
-        val inRealm = isInRealm(cat)
-        if (inRealm) {button.text= "Удалить из избранного"
+        val cat=realm.where(Cat::class.java).contains("text",text).findFirst()
+        val catNew = Cat()
+        catNew.text = text!!
+//        val inRealm = isInRealm(cat)
+        if (cat!=null) {button.text= "Удалить из избранного"
             button.setOnClickListener {
                 deletFromDB(cat)
 
             }
         }else {button.text="Добавить в избранное"
             button.setOnClickListener {
-            saveIntoDB(cat)
+            saveIntoDB(catNew)
 
         }}
     }
@@ -147,6 +153,12 @@ class DetailActivity : AppCompatActivity() {
         val jsonObject = JSONObject(responseText)
         val catImage = jsonObject.getString("file")
         return catImage
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        realm.removeAllChangeListeners()
+        realm.close()
+
     }
 
 }
