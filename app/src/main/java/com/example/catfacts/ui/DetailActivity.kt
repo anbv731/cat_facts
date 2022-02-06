@@ -55,6 +55,8 @@ class DetailActivity : AppCompatActivity() {
 
     }
 
+
+
     private fun changeFavourite() {
         initRealm()
     }

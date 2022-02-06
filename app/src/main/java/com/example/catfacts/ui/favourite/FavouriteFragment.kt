@@ -60,7 +60,15 @@ class FavouriteFragment : Fragment() {
         }
 
 
-
+    override fun onResume() {
+        super.onResume()
+        realm= Realm.getDefaultInstance()
+        val cats = realm.where(Cat::class.java).findAll()
+        realmChangeListener = RealmChangeListener<Realm> {println("REALM CHANGEed")
+            setList(cats)}
+        realm.addChangeListener(realmChangeListener)
+        setList(cats)
+    }
 
 
 
