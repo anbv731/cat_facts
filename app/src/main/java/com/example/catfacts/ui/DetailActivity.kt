@@ -25,8 +25,8 @@ class DetailActivity : AppCompatActivity() {
     private lateinit var imageViewDetail: ImageView
     private lateinit var button: Button
     private lateinit var textOffline: TextView
-    lateinit var realm :Realm
-    lateinit var realmChangeListener : RealmChangeListener<Realm>
+    lateinit var realm: Realm
+    lateinit var realmChangeListener: RealmChangeListener<Realm>
 
 
     companion object {
@@ -42,16 +42,16 @@ class DetailActivity : AppCompatActivity() {
         textViewDetail = findViewById(R.id.textViewDetail)
         imageViewDetail = findViewById(R.id.imageViewDetail)
         button = findViewById(R.id.button)
-        textOffline= findViewById(R.id.textViewOfflineDetail)
-        textOffline.visibility=GONE
-        textOffline.text="При загрузке изображения произошла ошибка"
+        textOffline = findViewById(R.id.textViewOfflineDetail)
+        textOffline.visibility = GONE
+        textOffline.text = "При загрузке изображения произошла ошибка"
 
         val queue = Volley.newRequestQueue(this)
         getImageFromServer(queue)
         setupActionBar()
         initRealm()
         realm = Realm.getDefaultInstance()
-        realmChangeListener = RealmChangeListener<Realm>{setText()}
+        realmChangeListener = RealmChangeListener<Realm> { setText() }
         realm.addChangeListener(realmChangeListener)
         setText()
 
@@ -104,19 +104,22 @@ class DetailActivity : AppCompatActivity() {
     private fun setText() {
         val text = intent?.extras?.getString(CAT_FACT_TEXT)
         textViewDetail.text = text
-        val cat=realm.where(Cat::class.java).contains("text",text).findFirst()
+        val cat = realm.where(Cat::class.java).contains("text", text).findFirst()
         val catNew = Cat()
         catNew.text = text!!
-        if (cat!=null) {button.text= "Удалить из избранного"
+        if (cat != null) {
+            button.text = "Удалить из избранного"
             button.setOnClickListener {
                 deletFromDB(cat)
 
             }
-        }else {button.text="Добавить в избранное"
+        } else {
+            button.text = "Добавить в избранное"
             button.setOnClickListener {
-            saveIntoDB(catNew)
+                saveIntoDB(catNew)
 
-        }}
+            }
+        }
     }
 
     private fun getImageFromServer(queue: RequestQueue) {
@@ -124,19 +127,22 @@ class DetailActivity : AppCompatActivity() {
         circularProgressDrawable.strokeWidth = 5f
         circularProgressDrawable.centerRadius = 30f
         circularProgressDrawable.start()
+        imageViewDetail.setImageDrawable(circularProgressDrawable)
         val requestOption = RequestOptions()
             .placeholder(circularProgressDrawable).centerCrop()
         val imageRequest = StringRequest(
             0,
             imageUrl,
             { response ->
-                textOffline.visibility=GONE
+                textOffline.visibility = GONE
                 val image = parseImageResponse(response)
+
                 Glide.with(this).applyDefaultRequestOptions(requestOption).load(image)
                     .into(imageViewDetail)
             },
             {
-                textOffline.visibility=VISIBLE
+                imageViewDetail.visibility = GONE
+                textOffline.visibility = VISIBLE
             }
         )
 
@@ -148,6 +154,7 @@ class DetailActivity : AppCompatActivity() {
         val catImage = jsonObject.getString("file")
         return catImage
     }
+
     override fun onDestroy() {
         super.onDestroy()
         realm.removeAllChangeListeners()
