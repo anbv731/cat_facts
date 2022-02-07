@@ -1,10 +1,11 @@
 package com.example.catfacts.ui
 
 import android.os.Bundle
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.android.volley.RequestQueue
@@ -13,18 +14,17 @@ import com.android.volley.toolbox.Volley
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.catfacts.R
-import com.example.catfacts.ui.favourite.FavouriteFragment
 import io.realm.Realm
 import io.realm.RealmChangeListener
 import io.realm.RealmConfiguration
 import io.realm.RealmResults
-import io.realm.kotlin.where
 import org.json.JSONObject
 
 class DetailActivity : AppCompatActivity() {
     private lateinit var textViewDetail: TextView
     private lateinit var imageViewDetail: ImageView
     private lateinit var button: Button
+    private lateinit var textOffline: TextView
     lateinit var realm :Realm
     lateinit var realmChangeListener : RealmChangeListener<Realm>
 
@@ -42,6 +42,9 @@ class DetailActivity : AppCompatActivity() {
         textViewDetail = findViewById(R.id.textViewDetail)
         imageViewDetail = findViewById(R.id.imageViewDetail)
         button = findViewById(R.id.button)
+        textOffline= findViewById(R.id.textViewOfflineDetail)
+        textOffline.visibility=GONE
+        textOffline.text="При загрузке изображения произошла ошибка"
 
         val queue = Volley.newRequestQueue(this)
         getImageFromServer(queue)
@@ -53,12 +56,6 @@ class DetailActivity : AppCompatActivity() {
         setText()
 
 
-    }
-
-
-
-    private fun changeFavourite() {
-        initRealm()
     }
 
     private fun initRealm() {
@@ -91,16 +88,11 @@ class DetailActivity : AppCompatActivity() {
         realm.commitTransaction()
     }
 
-    fun isInRealm(cat: Cat): Boolean {
-        val realm = Realm.getDefaultInstance()
-        return !realm.where(Cat::class.java).equalTo("text", cat.text).findAll().isEmpty()
-    }
-
     private fun setupActionBar() {
         supportActionBar?.apply {
             setDisplayShowHomeEnabled(true)
             setDisplayHomeAsUpEnabled(true)
-            title = "Detail"
+            title = "Детальный просмотр"
         }
     }
 
@@ -115,7 +107,6 @@ class DetailActivity : AppCompatActivity() {
         val cat=realm.where(Cat::class.java).contains("text",text).findFirst()
         val catNew = Cat()
         catNew.text = text!!
-//        val inRealm = isInRealm(cat)
         if (cat!=null) {button.text= "Удалить из избранного"
             button.setOnClickListener {
                 deletFromDB(cat)
@@ -139,12 +130,13 @@ class DetailActivity : AppCompatActivity() {
             0,
             imageUrl,
             { response ->
+                textOffline.visibility=GONE
                 val image = parseImageResponse(response)
                 Glide.with(this).applyDefaultRequestOptions(requestOption).load(image)
                     .into(imageViewDetail)
             },
             {
-                Toast.makeText(this, it.message, Toast.LENGTH_LONG).show()
+                textOffline.visibility=VISIBLE
             }
         )
 

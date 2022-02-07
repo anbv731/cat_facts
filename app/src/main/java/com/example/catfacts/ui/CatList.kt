@@ -9,14 +9,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.catfacts.R
 import com.example.catfacts.ui.DetailActivity.Companion.CAT_FACT_TEXT
-import io.realm.RealmChangeListener
-import io.realm.RealmResults
-import io.realm.kotlin.addChangeListener
 
 class CatAdapter(private val cats: List<Cat>) : RecyclerView.Adapter<CatViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CatViewHolder {
-        //создаем view из файла интерфейса
         val rootView = LayoutInflater
             .from(parent.context)
             .inflate(R.layout.cat_item, parent, false)
@@ -33,27 +29,17 @@ class CatAdapter(private val cats: List<Cat>) : RecyclerView.Adapter<CatViewHold
 }
 
 class CatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    private val imageUrl: String = "https://bing.ioliu.cn/v1/rand"
-    //находим ImageView
-
-
-    //Находим TextView
     private val textView: TextView = itemView.findViewById(R.id.textViewId)
-
-
 
     fun bind(cat: Cat) {
         textView.text = cat.text
-        itemView.setOnClickListener{
+        itemView.setOnClickListener {
             openDetailActivity(itemView.context, cat)
         }
 
-
-//
-//        itemView.setOnClickListener {
-//            DetailActivity.openDetailActivity(itemView.context, cat.text)
     }
-    private fun openDetailActivity (context: Context, cat:Cat) {
+
+    private fun openDetailActivity(context: Context, cat: Cat) {
         val intent = Intent(context, DetailActivity::class.java)
         intent.putExtra(CAT_FACT_TEXT, cat.text)
         context.startActivity(intent)
